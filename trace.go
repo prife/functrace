@@ -1,3 +1,4 @@
+//go:build trace
 // +build trace
 
 package functrace
@@ -8,6 +9,7 @@ import (
 	"runtime"
 	"strconv"
 	"sync"
+	"time"
 )
 
 var mu sync.Mutex
@@ -44,12 +46,16 @@ func Trace() func() {
 	v := m[id]
 	m[id] = v + 1
 	mu.Unlock()
-	printTrace(id, name, "->", v+1)
+
+	t1 := time.Now().Format("2006-01-02 15:04:05.999999999")
+
+	printTrace(id, name, "->["+t1+"] ", v+1)
 	return func() {
 		mu.Lock()
 		v := m[id]
 		m[id] = v - 1
 		mu.Unlock()
-		printTrace(id, name, "<-", v)
+		t2 := time.Now().Format("2006-01-02 15:04:05.999999999")
+		printTrace(id, name, "<-["+t2+"] ", v)
 	}
 }
